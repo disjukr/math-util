@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>행렬곱셈식출력기</title>
+    <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <style type="text/css">
+    table {
+        display: inline-table;
+        vertical-align: middle;
+        border-collapse: separate;
+        border-spacing: 5px;
+        border-left: 2px solid black;
+        border-right: 2px solid black;
+    }
+    td {
+        text-align: center;
+    }
+    </style>
+</head>
+<body>
+    <h1>행렬곱셈식출력기</h1>
+    <div id="left-dim">
+        왼쪽 <input type="number" class="col" value="2"> x <input type="number" class="row" value="2">
+    </div>
+    <div id="right-dim">
+        오른쪽 <input type="number" class="col" value="2"> x <input type="number" class="row" value="2">
+    </div>
+    <br>
+    <div>
+        <table id="left-matrix"></table> * <table id="right-matrix"></table> <br>
+        클릭해서 수정할 수 있습니다.
+    </div>
+    <br>
+    <h2>결과</h2>
+    <div id="result"></div>
+    <script type="text/javascript">// <![CDATA[
+    function makeTable(col, row, table) {
+        var tr = '<tr>' + new Array(+col + 1).join('<td contenteditable>0</td>') + '</tr>';
+        table.innerHTML = '<tbody>' + new Array(+row + 1).join(tr) + '</tbody>';
+        for (var i = 0; i < Math.min(row, col); ++i)
+            $('tr', table).eq(i).find('td').eq(i).text('1');
+    }
+    function initLeft() {
+        var col = Math.max($('#left-dim .col').val() | 0, 1);
+        var row = Math.max($('#left-dim .row').val() | 0, 1);
+        makeTable(col, row, $('#left-matrix')[0]);
+        result();
+        $('#left-matrix td').on('keyup', result);
+    }
+    initLeft();
+    function initRight() {
+        var col = Math.max($('#right-dim .col').val() | 0, 1);
+        var row = Math.max($('#right-dim .row').val() | 0, 1);
+        makeTable(col, row, $('#right-matrix')[0]);
+        result();
+        $('#right-matrix td').on('keyup', result);
+    }
+    initRight();
+    function result() {
+        if ($('tr:first-child td', '#left-matrix').length !== $('tr', '#right-matrix').length)
+            return $('#result').text('곱할 수 없습니다.');
+        var $resultTable = $('<table>');
+        var col = $('tr', '#left-matrix').length;
+        var row = $('tr:first-child td', '#right-matrix').length;
+        makeTable(col, row, $resultTable[0]);
+        var cellText;
+        for (var i = 0; i < row; ++i) {
+            for (var j = 0; j < col; ++j) {
+                $('tr', $resultTable).eq(i).children().eq(j).text(
+                    '(' + $('tr', '#right-matrix').map(function (index, rtr) {
+                        return $('tr', '#left-matrix').eq(i).children().eq(index).text() + '*' + $('td', rtr).eq(j).text();
+                    }).toArray().join(' + ') + ')'
+                );
+            }
+        }
+        $('#result').html('').append($resultTable);
+    }
+    result();
+    $('#left-dim input').on('keyup change', initLeft);
+    $('#right-dim input').on('keyup change', initRight);
+    // ]]></script>
+</body>
+</html>
